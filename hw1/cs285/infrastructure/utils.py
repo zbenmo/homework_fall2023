@@ -37,7 +37,8 @@ def sample_trajectory(env, policy, max_path_length, render=False):
     
         # TODO use the most recent ob to decide what to do
         # print(f'{type(ob)=}')
-        ac = ptu.to_numpy(policy(ptu.from_numpy(ob))) # TODO # HINT: this is a numpy array
+        ac, logstd = policy(ptu.from_numpy(ob))
+        ac = ptu.to_numpy(ac) # TODO # HINT: this is a numpy array
         # print(f'{type(ac)=}')
         # print(f'{ac.shape=}')
         # ac = ac[0]

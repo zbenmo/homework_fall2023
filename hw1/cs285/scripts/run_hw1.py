@@ -149,6 +149,7 @@ def run_training_loop(params):
                 # HINT: query the policy (using the get_action function) with paths[i]["observation"]
                 # and replace paths[i]["action"] with these expert labels
 
+                # TODO: potential for even more vectorizing?
                 for path in paths:
                     obs = path["observation"]
                     path["action"] = ptu.to_numpy(expert_policy(ptu.from_numpy(obs)))

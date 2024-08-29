@@ -132,7 +132,7 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         # raise NotImplementedError
         ac = self.mean_net(observation)
         # ?? self.logstd()
-        return ac
+        return ac, self.logstd
 
     def update(self, observations, actions):
         """
@@ -147,12 +147,22 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         # self.train()
         # TODO: update the policy and return the loss
         self.optimizer.zero_grad()
-        ac = self.__call__(ptu.from_numpy(observations))
-        # print(f'{ac.shape=}')
-        # print(f'{actions.shape=}')
-        loss = nn.MSELoss(reduction='none')
-        loss_result = torch.sum(loss(ac, ptu.from_numpy(actions)))
+        ac, logstd = self.__call__(ptu.from_numpy(observations))
+
+        # loss = nn.MSELoss(reduction='none')
+        # loss_result = torch.sum(loss(ac, ptu.from_numpy(actions)))
+        # loss_result.backward()
+
+        loss = nn.GaussianNLLLoss(
+            reduction='none'
+        )
+        var = torch.exp(logstd).pow(2) # .unsqueeze(1)
+        var = var.repeat((actions.shape[0], 1))
+        print(f'{var.shape=}')
+        print(f'{actions.shape=}')
+        loss_result = torch.mean(loss(ac, ptu.from_numpy(actions), var=var))
         loss_result.backward()
+
         self.optimizer.step()
         return {
             # You can add extra logging information here, but keep this line
