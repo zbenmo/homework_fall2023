@@ -158,8 +158,8 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         )
         var = torch.exp(logstd).pow(2) # .unsqueeze(1)
         var = var.repeat((actions.shape[0], 1))
-        print(f'{var.shape=}')
-        print(f'{actions.shape=}')
+        # print(f'{var.shape=}')
+        # print(f'{actions.shape=}')
         loss_result = torch.mean(loss(ac, ptu.from_numpy(actions), var=var))
         loss_result.backward()
 
