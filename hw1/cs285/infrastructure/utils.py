@@ -10,6 +10,8 @@ import cv2
 import numpy as np
 import time
 
+import torch
+
 from cs285.infrastructure import pytorch_util as ptu
 
 
@@ -38,6 +40,7 @@ def sample_trajectory(env, policy, max_path_length, render=False):
         # TODO use the most recent ob to decide what to do
         # print(f'{type(ob)=}')
         ac, logstd = policy(ptu.from_numpy(ob))
+        ac = torch.normal(mean=ac, std=torch.exp(logstd))
         ac = ptu.to_numpy(ac) # TODO # HINT: this is a numpy array
         # print(f'{type(ac)=}')
         # print(f'{ac.shape=}')
