@@ -83,7 +83,12 @@ def run_training_loop(args):
         trajs_dict = {k: [traj[k] for traj in trajs] for k in trajs[0]}
 
         # TODO: train the agent using the sampled trajectories and the agent's update function
-        train_info: dict = agent.update(**trajs_dict) # None
+        train_info: dict = agent.update(
+            obs=trajs_dict['observation'],
+            rewards=trajs_dict['reward'],
+            actions=trajs_dict['action'],
+            terminals=trajs_dict['terminal'],
+        ) # None
 
         if itr % args.scalar_log_freq == 0:
             # save eval metrics

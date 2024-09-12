@@ -37,7 +37,7 @@ def sample_trajectory(
 
         # TODO rollout can end due to done, or due to max_length
         steps += 1
-        rollout_done: bool = None
+        rollout_done: bool = done or steps == max_length # None
 
         # record result of taking that action
         obs.append(ob)
@@ -86,12 +86,14 @@ def sample_n_trajectories(
     env: gym.Env, policy: MLPPolicy, ntraj: int, max_length: int, render: bool = False
 ):
     """Collect ntraj rollouts."""
+    total_steps = 0
     trajs = []
     for _ in range(ntraj):
         # collect rollout
         traj = sample_trajectory(env, policy, max_length, render)
         trajs.append(traj)
-    return trajs
+        total_steps += len(traj)
+    return trajs, total_steps
 
 
 def compute_metrics(trajs, eval_trajs):
