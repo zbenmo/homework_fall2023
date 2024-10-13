@@ -92,21 +92,19 @@ class MLPPolicyPG(MLPPolicy):
     ) -> dict:
         """Implements the policy gradient actor update."""
         obs = ptu.from_numpy(obs)
-        actions = ptu.from_numpy(actions)
+        actions = ptu.from_numpy(actions).long()
         advantages = ptu.from_numpy(advantages)
 
         # TODO: implement the policy gradient actor update.
-        # print(obs.size())
-        # print(advantages.size())
 
         loss = None
         self.optimizer.zero_grad()
         if self.discrete:
-            logits = self.__call__(obs)
-            # print(logits.size())
-            loss = (logits.gather(1, actions.to(dtype=torch.int64).view(-1, 1)) * advantages).mean()
+            logits = self(obs)
+            oh = F.one_hot(actions, num_classes=2)
+            loss = ((logits * oh).sum(axis=1) * advantages).mean()
         else:
-            # mean, logstd = self.__call__(obs)
+            # mean, logstd = self(obs)
             # loss = ...
             pass
         loss.backward()

@@ -126,12 +126,12 @@ class PGAgent(nn.Module):
             advantages = rewards # None
         else:
             # TODO: run the critic and use it as a baseline
-            values = self.critic(obs) # None
+            values = self.critic(ptu.from_numpy(obs)) # None
             assert values.shape == q_values.shape
 
             if self.gae_lambda is None:
                 # TODO: if using a baseline, but not GAE, what are the advantages?
-                advantages = values - q_values # None
+                advantages = q_values - ptu.to_numpy(values)  # None
             else:
                 # TODO: implement GAE
                 batch_size = obs.shape[0]
