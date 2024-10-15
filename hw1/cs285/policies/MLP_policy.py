@@ -147,7 +147,7 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         # self.train()
         # TODO: update the policy and return the loss
         self.optimizer.zero_grad()
-        ac, logstd = self.__call__(ptu.from_numpy(observations))
+        ac, logstd = self(ptu.from_numpy(observations))
 
         # loss = nn.MSELoss(reduction='none')
         # loss_result = torch.sum(loss(ac, ptu.from_numpy(actions)))

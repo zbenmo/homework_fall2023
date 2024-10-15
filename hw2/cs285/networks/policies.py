@@ -59,7 +59,7 @@ class MLPPolicy(nn.Module):
     def get_action(self, obs: np.ndarray) -> np.ndarray:
         """Takes a single observation (as a numpy array) and returns a single action (as a numpy array)."""
         # TODO: implement get_action
-        action = self.__call__(ptu.from_numpy(obs).unsqueeze(dim=0)) # None
+        action = self(ptu.from_numpy(obs).unsqueeze(dim=0)) # None
 
         return ptu.to_numpy(action.squeeze(dim=0))
 
@@ -101,8 +101,11 @@ class MLPPolicyPG(MLPPolicy):
         self.optimizer.zero_grad()
         if self.discrete:
             logits = self(obs)
+            exps = logits.exp()
+            probs = exps / exps.sum(axis=1, keepdim=True)
+            log_probs = probs.log()
             oh = F.one_hot(actions, num_classes=2)
-            loss = ((logits * oh).sum(axis=1) * advantages).mean()
+            loss = (-log_probs * oh).sum(axis=1) @ advantages / len(obs)
         else:
             # mean, logstd = self(obs)
             # loss = ...
