@@ -101,11 +101,8 @@ class MLPPolicyPG(MLPPolicy):
         self.optimizer.zero_grad()
         if self.discrete:
             logits = self(obs)
-            exps = logits.exp()
-            probs = exps / exps.sum(axis=1, keepdim=True)
-            log_probs = probs.log()
-            oh = F.one_hot(actions, num_classes=2)
-            loss = (-log_probs * oh).sum(axis=1) @ advantages / len(obs)
+            negative_likelihoods = F.cross_entropy(logits, actions, reduction='none')
+            loss = (negative_likelihoods @ advantages) / len(obs)
         else:
             # mean, logstd = self(obs)
             # loss = ...
