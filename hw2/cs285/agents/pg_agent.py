@@ -137,7 +137,7 @@ class PGAgent(nn.Module):
                 batch_size = obs.shape[0]
 
                 # HINT: append a dummy T+1 value for simpler recursive calculation
-                values = np.append(values, [0])
+                values = np.append(ptu.to_numpy(values), [0])
                 advantages = np.zeros(batch_size + 1)
 
                 for i in reversed(range(batch_size)):
@@ -145,9 +145,9 @@ class PGAgent(nn.Module):
                     # HINT: use terminals to handle edge cases. terminals[i] is 1 if the state is the last in its
                     # trajectory, and 0 otherwise.
                     if terminals[i]:
-                        advantages[i] = 0
+                        advantages[i] = q_values[i] - values[i]
                     else:
-                        advantages[i] = self.gae_lambda * advantages[i + 1] + values[i] - q_values[i] # ???!!!
+                        advantages[i] = q_values[i] - values[i] + self.gae_lambda * advantages[i + 1]
 
                 # remove dummy advantage
                 advantages = advantages[:-1]
