@@ -48,7 +48,11 @@ class DQNAgent(nn.Module):
         observation = ptu.from_numpy(np.asarray(observation))[None]
 
         # TODO(student): get the action from the critic using an epsilon-greedy strategy
-        action = ...
+        action = (
+            torch.tensor(np.random.choice(self.num_actions))
+            if np.random.uniform() <= epsilon
+            else self.critic(observation).argmax()
+        )
 
         return ptu.to_numpy(action).squeeze(0).item()
 
@@ -66,21 +70,19 @@ class DQNAgent(nn.Module):
         # Compute target values
         with torch.no_grad():
             # TODO(student): compute target values
-            next_qa_values = ...
+            next_qa_values = self.critic(next_obs)
 
             if self.use_double_q:
                 raise NotImplementedError
             else:
-                next_action = ...
+                next_q_values, next_action = next_qa_values.max(dim=1)
             
-            next_q_values = ...
-            target_values = ...
+            target_values = reward + self.discount * next_q_values
 
         # TODO(student): train the critic with the target values
-        qa_values = ...
-        q_values = ... # Compute from the data actions; see torch.gather
-        loss = ...
-
+        qa_values = self.critic(obs)
+        q_values = torch.gather(qa_values, dim=1, index=action.view(-1, 1)).squeeze() # Compute from the data actions; see torch.gather
+        loss = self.critic_loss(q_values, target_values)
 
         self.critic_optimizer.zero_grad()
         loss.backward()
@@ -114,5 +116,6 @@ class DQNAgent(nn.Module):
         Update the DQN agent, including both the critic and target.
         """
         # TODO(student): update the critic, and the target if needed
+        critic_stats = self.update_critic(obs, action, reward, next_obs, done)
 
         return critic_stats
