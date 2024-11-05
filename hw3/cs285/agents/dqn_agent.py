@@ -70,11 +70,17 @@ class DQNAgent(nn.Module):
         # Compute target values
         with torch.no_grad():
             # TODO(student): compute target values
-            next_qa_values = self.target_critic(next_obs)
 
             if self.use_double_q:
-                raise NotImplementedError
+                next_qa_values = self.critic(next_obs)
+                _, next_q_values_idx = next_qa_values.max(dim=1)
+                next_q_values = torch.gather(
+                    self.target_critic(next_obs),
+                    dim=1,
+                    index=next_q_values_idx.view(-1, 1)
+                ).squeeze()
             else:
+                next_qa_values = self.target_critic(next_obs)
                 next_q_values, _ = next_qa_values.max(dim=1)
             
             target_values = reward + np.where(done, 0, self.discount * next_q_values)
